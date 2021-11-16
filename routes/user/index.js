@@ -3,6 +3,7 @@ const router = new Router
 const sql = require('../../controller/sql/index')
 const jwt = require('jsonwebtoken')
 const util = require('../../util/index')
+const fs = require('fs');
 const tokenTime = 1000 * 60 * 60
 const secret = process.env.secret
 
@@ -26,11 +27,6 @@ router.post('/register', async (ctx, next) => {
         }
     } catch(err) {
         console.log(err)
-        ctx.body = {
-            state: 500,
-            success: false,
-            message: err.sqlMessage
-        }
     }
 })
 
@@ -56,11 +52,6 @@ router.post('/login', async (ctx, next) => {
         }
     } catch(err) {
         ctx.throw(err)
-        ctx.body = {
-            state: 500,
-            success: false,
-            message: err.sqlMessage
-        }
     }
 })
 
@@ -68,8 +59,19 @@ router.post('/login', async (ctx, next) => {
 修改用户除id和password外一切信息
  */
 router.post('/editMessage', async (ctx, next) => {
-    const { head } = ctx.request.files.head
-    console.log(ctx.request)
+    const file = ctx.request.files.head
+    const { name, tag } = ctx.request.body
+    let uploadPath = ctx.state.path + `\\${file.name}`
+    const head = await util.uploadFile(file, uploadPath)
+    const { id } = ctx.state.user
+    let insert = util.filterUpdateValue({ name, tag, head })
+    await sql.query(`update user set ${insert.keys} where id like ?`, [...insert.values, id])
+    ctx.body = {
+        message: '修改成功',
+        url: head,
+        success: true,
+        state: 200
+    }
 })
 
 /*
@@ -98,7 +100,7 @@ router.post('/changePassword', async (ctx, next) => {
         ctx.body = {
             state: 300,
             success: false,
-            message: '密码包含 数字,英文,字符中的两种以上，长度6-20',
+            message: '密码包含 数字,英文,字符中的两种以上，长度6-20'
         }
     }
 })
@@ -120,8 +122,7 @@ router.get('/isExist', async (ctx, next) => {
             }
         }
     } catch (err) {
-        console.log(err)
-        ctx.body = err
+        throw err
     }
 })
 

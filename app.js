@@ -12,6 +12,7 @@ const jwt = require('./controller/jwt/index')
 const user = require('./routes/user/index')
 const port = 3005
 
+app.use(err)
 app.use(static(__dirname + '/static'))
 app.use(async function (ctx, next) {
     ctx.state.path = __dirname + '\\static'
@@ -27,6 +28,5 @@ router.use('/user', user.routes(), user.allowedMethods())
 
 app.use(router.routes(), router.allowedMethods());
 
-app.use(err)
 //监听3000端口
 app.listen(port, () => { console.log(`应用已运行于${port}端口`) });
