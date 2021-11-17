@@ -26,7 +26,7 @@ router.post('/register', async (ctx, next) => {
             }
         }
     } catch(err) {
-        console.log(err)
+        throw err
     }
 })
 
@@ -60,11 +60,11 @@ router.post('/login', async (ctx, next) => {
  */
 router.post('/editMessage', async (ctx, next) => {
     const file = ctx.request.files.head
-    const { name, tag } = ctx.request.body
+    const { name, tag, introduction } = ctx.request.body
     let uploadPath = ctx.state.path + `\\${file.name}`
     const head = await util.uploadFile(file, uploadPath)
     const { id } = ctx.state.user
-    let insert = util.filterUpdateValue({ name, tag, head })
+    let insert = util.filterUpdateValue({ name, tag, head, introduction })
     await sql.query(`update user set ${insert.keys} where id like ?`, [...insert.values, id])
     ctx.body = {
         message: '修改成功',
@@ -90,11 +90,7 @@ router.post('/changePassword', async (ctx, next) => {
                 message: '修改成功,重新登录后生效'
             }
         } catch(err) {
-            ctx.body= {
-                state: 500,
-                success: false,
-                message: err.sqlMessage
-            }
+            throw err
         }
     } else {
         ctx.body = {
@@ -127,4 +123,4 @@ router.get('/isExist', async (ctx, next) => {
 })
 
 
-module.exports = router
+module.exports = router.routes()

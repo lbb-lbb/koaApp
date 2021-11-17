@@ -1,23 +1,18 @@
 const fs = require('fs');
 
-/*
-** 将接受到的文件和path写入到当前的path中
+/**
+ * 将接受到的文件和path写入到当前的path中
  */
 module.exports.uploadFile = function (file, path) {
     let readStream = fs.createReadStream(file.path)
     let writeStream = fs.createWriteStream(path)
-    if (fs.existsSync(path)) {
+    if (!fs.existsSync(path)) {
+        // todo
         readStream.pipe(writeStream)
         return path
     } else {
-        fs.mkdir(path, err => {
-            if (err){
-                throw new Error(err)
-            } else {
-                readStream.pipe(writeStream)
-                return path
-            }
-        })
+        readStream.pipe(writeStream)
+        return path
     }
 }
 /**
