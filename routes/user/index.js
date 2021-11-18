@@ -3,7 +3,6 @@ const router = new Router
 const sql = require('../../controller/sql/index')
 const jwt = require('jsonwebtoken')
 const util = require('../../util/index')
-const fs = require('fs');
 const tokenTime = 1000 * 60 * 60
 const secret = process.env.secret
 
