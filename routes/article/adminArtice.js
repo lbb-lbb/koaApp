@@ -53,4 +53,41 @@ router.post('/article/delete', async (ctx, next) => {
     }
 })
 
+/**
+ * 返回文章列表
+ */
+router.get('/article/list', async (ctx,next) => {
+    const { pageSize, pageNo, title } = ctx.request.query
+    const { id } = ctx.state.user
+    try {
+        const result = await sql.query('select title, id, abstract, tag, category, likeCount, readCount, commentCount from article ' +
+            `where title like "%${title}%" and userId = ${id} limit ${(pageNo - 1) * pageSize}, ${pageSize}`)
+        ctx.body =  {
+            state: 200,
+            success: true,
+            result: result
+        }
+    } catch (err) {
+        throw err
+    }
+})
+
+/**
+ * 文章详情
+ */
+router.get('/article/Info', async (ctx, next) => {
+    const { id } = ctx.request.query
+    const userId = ctx.state.user.id
+    try {
+        const result = await sql.query('select * from article where id = ? and userId = ?', [id, userId])
+        ctx.body =  {
+            state: 200,
+            success: true,
+            result: result
+        }
+    } catch (err) {
+        throw err
+    }
+})
+
 module.exports = router.routes()
