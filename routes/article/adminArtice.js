@@ -30,7 +30,7 @@ router.post('/article/create', async (ctx, next) => {
 router.post('/article/update', async (ctx, next) => {
     const { title, abstract, tag, category, status, id, content } = ctx.request.body
     let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
-    let a = await sql.query(`update article set ${insert.keys} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
+    let a = await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
     console.log(a)
     ctx.body = {
         message: '修改成功',

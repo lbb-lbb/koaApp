@@ -25,7 +25,7 @@ module.exports.filterUpdateValue = function(obj) {
             delete newObj[i]
         }
     }
-    let keys = Object.keys(newObj).map(key => `${key} = ?`).join(',')
+    let keys = Object.keys(newObj)
     let values = Object.values(newObj)
     return { keys, values }
 }

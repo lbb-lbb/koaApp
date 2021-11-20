@@ -12,6 +12,7 @@ const jwt = require('./controller/jwt/index')
 const user = require('./routes/user/index')
 const article = require('./routes/article/adminArtice')
 const articleShow = require('./routes/article/artice')
+const comment = require('./routes/comment/index')
 const port = 3005
 
 app.use(err)
@@ -33,6 +34,7 @@ app.use(jwt)
 router.use('/user', user)
 router.use('/page', article)
 router.use('/show', articleShow)
+router.use('/comment', comment)
 app.use(router.routes(), router.allowedMethods());
 
 //监听3000端口

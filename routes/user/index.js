@@ -64,7 +64,7 @@ router.post('/editMessage', async (ctx, next) => {
     const head = await util.uploadFile(file, uploadPath)
     const { id } = ctx.state.user
     let insert = util.filterUpdateValue({ name, tag, head, introduction })
-    await sql.query(`update user set ${insert.keys} where id like ?`, [...insert.values, id])
+    await sql.query(`update user set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ?`, [...insert.values, id])
     ctx.body = {
         message: '修改成功',
         url: head,

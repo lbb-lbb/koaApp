@@ -1,6 +1,8 @@
 const Router = require('koa-router')
 const router = new Router
 const sql = require('../../controller/sql/index')
+const util = require('../../util/index')
+
 
 /**
  * 返回文章列表
@@ -35,6 +37,26 @@ router.get('/articleInfo', async (ctx, next) => {
     } catch (err) {
         throw err
     }
+})
+
+/**
+ *点赞、阅读量、喜欢数量自增
+ */
+router.post('/count', async (ctx, next) => {
+    const { likeCount, readCount, commentCount, id } = ctx.request.body
+    try {
+        let insert = util.filterUpdateValue({ likeCount, readCount, commentCount })
+        console.log(`update article set ${insert.keys.map(v => `${v}= ${v}+1`)} where id like ?`)
+        await sql.query(`update article set ${insert.keys.map(v => `${v}= ${v}+1`)} where id like ?`, [id])
+        ctx.body = {
+            state: 200,
+            success: true,
+            message: "提交成功"
+        }
+    } catch (err) {
+        throw err
+    }
+
 })
 
 module.exports = router.routes()
