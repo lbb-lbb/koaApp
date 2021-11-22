@@ -89,5 +89,63 @@ router.get('/article/Info', async (ctx, next) => {
         throw err
     }
 })
-
+/**
+ * 修改文章状态
+ */
+router.post('/article/status', async (ctx, next) =>{
+    const { status, id } = ctx.request.body
+    const userId = ctx.state.user.id
+    try {
+        if (status !== 0 || status !== 1 || status !== 2 || status !== 3) {
+            ctx.body = {
+                state: 300,
+                success: false,
+                message: "请检查修改状态是否正确"
+            }
+        } else  {
+            await sql.query(`update article set status = ? where id =? and userId = ?`, [status, id, userId])
+            ctx.body = {
+                state: 200,
+                success: true,
+                message: "修改成功",
+            }
+        }
+    } catch (err) {
+        throw err
+    }
+})
+/**
+ *修改评论状态
+ */
+router.post('/article/comment/status', async (ctx, next) =>{
+    const { status, id, titleId } = ctx.request.body
+    const userId = ctx.state.user.id
+    try {
+        if (status != 0 && status != 1 && status != 2) {
+            ctx.body = {
+                state: 300,
+                success: false,
+                message: "请检查修改状态是否正确"
+            }
+        } else  {
+            let result =  await sql.query(`select userId from article where id = ?`, [titleId])
+            if (userId === result[0].userId) {
+                await sql.query(`update comment set status = ? where id =?`, [status, id])
+                ctx.body = {
+                    state: 200,
+                    success: true,
+                    message: "修改成功",
+                }
+            } else {
+                ctx.body = {
+                    state: 300,
+                    success: false,
+                    message: "无权限修改它人文章的评论状态",
+                }
+            }
+        }
+    } catch (err) {
+        throw err
+    }
+})
 module.exports = router.routes()
