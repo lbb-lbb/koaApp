@@ -8,6 +8,7 @@ require('dotenv').config()
 
 const err = require('./controller/err/index')
 const jwt = require('./controller/jwt/index')
+const cors = require('./controller/cors/index')
 
 const user = require('./routes/user/index')
 const article = require('./routes/article/adminArtice')
@@ -15,6 +16,7 @@ const articleShow = require('./routes/article/artice')
 const comment = require('./routes/comment/index')
 const port = 3005
 
+app.use(cors)
 app.use(err)
 app.use(static(__dirname + '/static'))
 app.use(async function (ctx, next) {

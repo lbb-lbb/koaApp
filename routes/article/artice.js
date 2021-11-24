@@ -8,14 +8,17 @@ const util = require('../../util/index')
  * 返回文章列表
  */
 router.get('/articleList', async (ctx,next) => {
-    const { pageSize, pageNo, title } = ctx.request.query
+    let { pageSize, pageNo, title } = ctx.request.query
+    pageSize = pageSize || 100000
+    pageNo = pageNo || 1
     try {
-        const result = await sql.query('select title, id, abstract, tag, category, likeCount, readCount, commentCount from article ' +
+        const result = await sql.query('select title, id, abstract, tag, category, likeCount, readCount, commentCount, userName, creatTime, updateTime from article ' +
             `where title like "%${title}%" limit ${(pageNo - 1) * pageSize}, ${pageSize}`)
         ctx.body =  {
             state: 200,
             success: true,
-            result: result
+            result: result,
+            total: result.length
         }
     } catch (err) {
         throw err
@@ -32,7 +35,7 @@ router.get('/articleInfo', async (ctx, next) => {
         ctx.body =  {
             state: 200,
             success: true,
-            result: result
+            result: result[0]
         }
     } catch (err) {
         throw err
