@@ -31,10 +31,13 @@ router.post('/create', async(ctx, next) => {
  * 返回文章下的评论
  */
 router.get('/getComment', async (ctx, next) => {
-  const id = ctx.request.query.id
+  const { id, pageNo, pageSize } = ctx.request.query
   try {
-    let result = await sql.query(`select * from comment where titleId = ?`, [id])
-    let commentList = result.filter(v => !v.pid)
+    let result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分%秒\') as creatTime,
+        DATE_FORMAT(updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime
+        from comment where titleId = ? order by creatTime desc`, [id])
+    let countComment = result.filter(v => !v.pid)
+    let commentList = countComment.slice((pageNo - 1) * pageSize, pageSize * pageNo)
     commentList.forEach(v => {
       v.reply = result.filter(s => v.id === s.pid)
       v.reply.forEach(q => {
@@ -46,7 +49,8 @@ router.get('/getComment', async (ctx, next) => {
     ctx.body = {
       state: 200,
       success: true,
-      result: commentList
+      result: commentList,
+      count: countComment.length
     }
   } catch (err) {
     throw err

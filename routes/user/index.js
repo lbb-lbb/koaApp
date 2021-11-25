@@ -61,7 +61,10 @@ router.post('/editMessage', async (ctx, next) => {
     const file = ctx.request.files.head
     const { name, tag, introduction } = ctx.request.body
     let uploadPath = ctx.state.path + `\\${file.name}`
-    const head = await util.uploadFile(file, uploadPath)
+    let head
+    if (uploadPath) {
+        head = await util.uploadFile(file, uploadPath)
+    }
     const { id } = ctx.state.user
     let insert = util.filterUpdateValue({ name, tag, head, introduction })
     await sql.query(`update user set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ?`, [...insert.values, id])
