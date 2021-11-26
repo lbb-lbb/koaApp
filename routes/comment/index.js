@@ -33,7 +33,7 @@ router.post('/create', async(ctx, next) => {
 router.get('/getComment', async (ctx, next) => {
   const { id, pageNo, pageSize } = ctx.request.query
   try {
-    let result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分%秒\') as creatTime,
+    let result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
         DATE_FORMAT(updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime
         from comment where titleId = ? order by creatTime desc`, [id])
     let countComment = result.filter(v => !v.pid)
