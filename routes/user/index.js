@@ -36,11 +36,13 @@ router.post('/login', async (ctx, next) => {
         if (password === result[0].password) {
             let { name, id } = result[0]
             const token = jwt.sign({ name, id }, secret, { expiresIn: tokenTime })
+            delete result[0].password
             ctx.body = {
                 state: 200,
                 success: true,
                 message: '登录成功',
-                data_token: token
+                token: token,
+                result: result[0]
             }
         } else {
             ctx.body = {
