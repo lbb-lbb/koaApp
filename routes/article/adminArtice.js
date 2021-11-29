@@ -60,8 +60,10 @@ router.get('/article/list', async (ctx,next) => {
     const { pageSize, pageNo, title } = ctx.request.query
     const { id } = ctx.state.user
     try {
-        const result = await sql.query('select title, id, abstract, tag, category, likeCount, readCount, commentCount from article ' +
-            `where title like "%${title}%" and userId = ${id} limit ${(pageNo - 1) * pageSize}, ${pageSize}`)
+        const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
+            commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
+            DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title like "%${title}%" 
+            and userId = '${id}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         ctx.body =  {
             state: 200,
             success: true,
@@ -91,6 +93,7 @@ router.get('/article/Info', async (ctx, next) => {
 })
 /**
  * 修改文章状态
+ * 0: 草稿。 1：完成。 2： 发布。 3: 删除
  */
 router.post('/article/status', async (ctx, next) =>{
     const { status, id } = ctx.request.body
@@ -119,6 +122,7 @@ router.post('/article/status', async (ctx, next) =>{
  */
 router.post('/article/comment/status', async (ctx, next) =>{
     const { status, id, titleId } = ctx.request.body
+    console.log(status,id,titleId)
     const userId = ctx.state.user.id
     try {
         if (status != 0 && status != 1 && status != 2) {
@@ -148,4 +152,30 @@ router.post('/article/comment/status', async (ctx, next) =>{
         throw err
     }
 })
+/*
+* 作者回复评论
+ */
+router.post('replay', async(ctx, next) => {
+    const { name, id } = ctx.state.user
+    const { comment, titleId, pid, replyId } = ctx.request.body
+    if (!comment || !titleId || !name || !replyId) {
+        ctx.body = {
+            state: 300,
+            success: false,
+            message:  "错误！评论信息填写不完整！"
+        }
+    }
+    try {
+        await sql.query('insert into comment(comment, titleId, pid, name, replyId, status, id) values(?,?,?,?,?,1,uuid())',
+          [comment, titleId, pid, name, replyId])
+        ctx.body = {
+            state: 200,
+            success: true,
+            message: '回复成功'
+        }
+    } catch (err) {
+        throw err
+    }
+})
+
 module.exports = router.routes()

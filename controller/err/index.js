@@ -6,7 +6,8 @@ module.exports = async (ctx, next) => {
         if (err.status === 401) {
             ctx.status = 401;
             ctx.body = {
-                error: err.originalError ? err.originalError.message : err.message
+                state: 401,
+                message: err.originalError ? err.originalError.message : err.message
             };
         } else {
             ctx.body = {
