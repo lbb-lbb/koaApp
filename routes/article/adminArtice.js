@@ -122,10 +122,10 @@ router.post('/article/status', async (ctx, next) =>{
  */
 router.post('/article/comment/status', async (ctx, next) =>{
     const { status, id, titleId } = ctx.request.body
-    console.log(status,id,titleId)
+    console.log(ctx.state)
     const userId = ctx.state.user.id
     try {
-        if (status != 0 && status != 1 && status != 2) {
+        if (status !== 0 && status !== 1 && status !== 2) {
             ctx.body = {
                 state: 300,
                 success: false,
@@ -133,7 +133,9 @@ router.post('/article/comment/status', async (ctx, next) =>{
             }
         } else  {
             let result =  await sql.query(`select userId from article where id = ?`, [titleId])
+            console.log(result)
             if (userId === result[0].userId) {
+                console.log(id)
                 await sql.query(`update comment set status = ? where id =?`, [status, id])
                 ctx.body = {
                     state: 200,
@@ -144,7 +146,7 @@ router.post('/article/comment/status', async (ctx, next) =>{
                 ctx.body = {
                     state: 300,
                     success: false,
-                    message: "无权限修改它人文章的评论状态",
+                    message: "无权限修改它人文章的评论",
                 }
             }
         }
@@ -177,5 +179,35 @@ router.post('replay', async(ctx, next) => {
         throw err
     }
 })
-
+/**
+ *返回给作者的评论审核，评论回复，点赞信息，留言
+ */
+router.get('/getCommentList', async (ctx, next) => {
+    const { id } = ctx.state.user
+    let { status, pageSize, pageNo } = ctx.request.query
+    pageNo = pageNo || 1
+    pageSize = pageSize || 10
+    try {
+        let result = await sql.query(`select 
+            comment.*,
+            DATE_FORMAT(comment.creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
+            DATE_FORMAT(comment.updateTime,\'%Y年%m月%d日%H时%i分%s秒\') as updateTime,
+            article.id as titleId,
+            article.title
+            from comment, article where article.userId = '${id}' and comment.titleId
+            = article.id and comment.status = '${status}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+        for (let v in result) {
+            if (result[v].pid) {
+                result[v].replyGroup = await sql.query(`select * from comment where id = '${result[v].pid}'`)
+            }
+        }
+        ctx.body = {
+            state: 200,
+            success: true,
+            result: result
+        }
+    } catch (err) {
+        throw err
+    }
+})
 module.exports = router.routes()

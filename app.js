@@ -35,8 +35,8 @@ app.use(jwt)
 
 router.use('/user', user)
 router.use('/page', article)
-router.use('/show', articleShow)
-router.use('/comment', comment)
+router.use('/common', articleShow)
+router.use('/discuss', comment)
 app.use(router.routes(), router.allowedMethods());
 
 //监听3000端口
