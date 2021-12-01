@@ -35,17 +35,18 @@ router.get('/getComment', async (ctx, next) => {
   try {
     let result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
         DATE_FORMAT(updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime
-        from comment where titleId = ? order by creatTime desc`, [id])
+        from comment where status = 1 and titleId = ? order by creatTime desc`, [id])
     let countComment = result.filter(v => !v.pid)
     let commentList = countComment.slice((pageNo - 1) * pageSize, pageSize * pageNo)
     commentList.forEach(v => {
       v.reply = result.filter(s => v.id === s.pid)
       v.reply.forEach(q => {
         if(q.replyId) {
-          q.replyGroup = result.filter(y => y.id === q.replyId)
+          q.replyGroup = JSON.parse(JSON.stringify(result)).filter(y => y.id === q.replyId)
         }
       })
     })
+    console.log(commentList)
     ctx.body = {
       state: 200,
       success: true,

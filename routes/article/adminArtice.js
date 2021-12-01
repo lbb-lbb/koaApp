@@ -119,13 +119,13 @@ router.post('/article/status', async (ctx, next) =>{
 })
 /**
  *修改评论状态
+ *  * 0: 待审核。 1：未读。 2： 已读。 3: 删除
  */
 router.post('/article/comment/status', async (ctx, next) =>{
     const { status, id, titleId } = ctx.request.body
-    console.log(ctx.state)
     const userId = ctx.state.user.id
     try {
-        if (status !== 0 && status !== 1 && status !== 2) {
+        if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
             ctx.body = {
                 state: 300,
                 success: false,
@@ -157,10 +157,10 @@ router.post('/article/comment/status', async (ctx, next) =>{
 /*
 * 作者回复评论
  */
-router.post('replay', async(ctx, next) => {
+router.post('/replay', async(ctx, next) => {
     const { name, id } = ctx.state.user
     const { comment, titleId, pid, replyId } = ctx.request.body
-    if (!comment || !titleId || !name || !replyId) {
+    if (!comment || !titleId || !name) {
         ctx.body = {
             state: 300,
             success: false,
@@ -198,7 +198,8 @@ router.get('/getCommentList', async (ctx, next) => {
             = article.id and comment.status = '${status}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         for (let v in result) {
             if (result[v].pid) {
-                result[v].replyGroup = await sql.query(`select * from comment where id = '${result[v].pid}'`)
+                let replyData = await sql.query(`select * from comment where id = '${result[v].pid}'`)
+                result[v].replyGroup = replyData[0]
             }
         }
         ctx.body = {
