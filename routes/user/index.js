@@ -32,7 +32,7 @@ router.post('/register', async (ctx, next) => {
 router.post('/login', async (ctx, next) => {
     const { name, password } = ctx.request.body
     try {
-        const result = await sql.query('select name, password, id from user where name = ?', [name])
+        const result = await sql.query('select * from user where name = ?', [name])
         if (password === result[0].password) {
             let { name, id } = result[0]
             const token = jwt.sign({ name, id }, secret, { expiresIn: tokenTime })
@@ -55,24 +55,39 @@ router.post('/login', async (ctx, next) => {
         ctx.throw(err)
     }
 })
+/**
+ * 用户上传图片于目录并返回路径
+ * @file 上传字段
+ */
+router.post('/upload', async (ctx, next) => {
+    try {
+        console.log(ctx.request.files)
+        const file = ctx.request.files.file
+        let uploadPath = ctx.state.path + `\\${file.name}`
+        let path
+        if (uploadPath) {
+            path = await util.uploadFile(file, uploadPath)
+            ctx.body = {
+                state: 200,
+                success: true,
+                path: path
+            }
+        }
+    } catch (err) {
+        throw err
+    }
+})
 
 /*
 修改用户除id和password外一切信息
  */
 router.post('/editMessage', async (ctx, next) => {
-    const file = ctx.request.files.head
-    const { name, tag, introduction } = ctx.request.body
-    let uploadPath = ctx.state.path + `\\${file.name}`
-    let head
-    if (uploadPath) {
-        head = await util.uploadFile(file, uploadPath)
-    }
+    const { name, tag, introduction, head } = ctx.request.body
     const { id } = ctx.state.user
     let insert = util.filterUpdateValue({ name, tag, head, introduction })
     await sql.query(`update user set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ?`, [...insert.values, id])
     ctx.body = {
         message: '修改成功',
-        url: head,
         success: true,
         state: 200
     }
@@ -82,16 +97,26 @@ router.post('/editMessage', async (ctx, next) => {
 只能修改密码
  */
 router.post('/changePassword', async (ctx, next) => {
-    const { password } = ctx.request.body
+    const { password, oldPassword } = ctx.request.body
+    console.log(ctx.request.body)
     const regexp = new RegExp('^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)])+$).{6,20}$')
     if (regexp.test(password)) {
         try {
             const { id } = ctx.state.user
-            await sql.query('update user set password = ? where id like ?', [password, id])
-            ctx.body = {
-                state: 200,
-                success: true,
-                message: '修改成功,重新登录后生效'
+            const result = await sql.query(`select password from user where id like ?`, [id])
+            if (result[0].password === oldPassword) {
+                await sql.query('update user set password = ? where id like ?', [password, id])
+                ctx.body = {
+                    state: 200,
+                    success: true,
+                    message: '修改成功,重新登录后生效'
+                }
+            } else {
+                ctx.body = {
+                    state: 300,
+                    success: false,
+                    message: '原密码输入错误'
+                }
             }
         } catch(err) {
             throw err

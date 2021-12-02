@@ -20,7 +20,7 @@ app.use(cors)
 app.use(err)
 app.use(static(__dirname + '/static'))
 app.use(async function (ctx, next) {
-    ctx.state.path = __dirname + '\\static'
+    ctx.state.path = `http://localhost:3005/static`
     await next();
 })
 app.use(bodyBody({
