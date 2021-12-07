@@ -5,15 +5,28 @@ const util = require('../../util/index')
 
 
 /**
- * 创建文章
+ * 创建文章或者修改文章
  */
 router.post('/article/create', async (ctx, next) => {
-    const { title, abstract, tag, category, status, content } = ctx.request.body
-    const { id, name } = ctx.state.user
-    console.log({ title, abstract, tag, category, status })
+    const { title, abstract, tag, category, status, content, id } = ctx.request.body
+    const { UserId, name } = ctx.state.user
     try {
-        await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(uuid(), ?, ?, ?, ? ,?, ?, ?, ?)',
-            [title, abstract, tag, category, status, id, content, name])
+        if(id) {
+            let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
+            let a =  await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
+            let insertId = await sql.query(`SELECT LAST_INSERT_ID()`)
+            console.log(a)
+            ctx.body = {
+                message: '修改成功',
+                success: true,
+                state: 200
+            }
+        } else {
+            let a = await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(uuid(), ?, ?, ?, ? ,?, ?, ?, ?)',
+                [title, abstract, tag, category, status, UserId, content, name])
+            let insertId = await sql.query(`SELECT LAST_INSERT_ID()`)
+            console.log(a)
+        }
         ctx.body = {
             state: 200,
             success: true,
@@ -21,21 +34,6 @@ router.post('/article/create', async (ctx, next) => {
         }
     } catch(err) {
         throw err
-    }
-})
-
-/**
- * 修改文章
- */
-router.post('/article/update', async (ctx, next) => {
-    const { title, abstract, tag, category, status, id, content } = ctx.request.body
-    let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
-    let a = await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
-    console.log(a)
-    ctx.body = {
-        message: '修改成功',
-        success: true,
-        state: 200
     }
 })
 
@@ -99,7 +97,7 @@ router.post('/article/status', async (ctx, next) =>{
     const { status, id } = ctx.request.body
     const userId = ctx.state.user.id
     try {
-        if (status !== 0 || status !== 1 || status !== 2 || status !== 3) {
+        if (status !== 0 && status !== 1 && status !== 2 && status !== 3) {
             ctx.body = {
                 state: 300,
                 success: false,
@@ -211,4 +209,23 @@ router.get('/getCommentList', async (ctx, next) => {
         throw err
     }
 })
+/**
+ * 返回文章的分类给作者选
+ */
+router.get('/article/classifyList', async (ctx, next) => {
+    try {
+        let result = await sql.query(`select tag, category from article`)
+        let tags = [...new Set(result.map(v => v.tag).join(',').replace(/，/ig,',').split(','))]
+        let category = [...new Set(result.map(v => v.category).join(',').split(','))]
+        ctx.body = {
+            state: 200,
+            success: true,
+            result: { tags, category }
+        }
+    } catch (err) {
+        throw err
+    }
+})
+
+
 module.exports = router.routes()
