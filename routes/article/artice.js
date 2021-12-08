@@ -15,12 +15,14 @@ router.get('/articleList', async (ctx,next) => {
     try {
         const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
             commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
-            DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title like "%${title}%" limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title 
+            like "%${title}%" and status=2 limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+        const count = await sql.query(`select count(*) as count from article where title like "%${title}%"`)
         ctx.body =  {
             state: 200,
             success: true,
             result: result,
-            total: result.length
+            count: count[0].count
         }
     } catch (err) {
         throw err
@@ -33,8 +35,8 @@ router.get('/articleList', async (ctx,next) => {
 router.get('/articleInfo', async (ctx, next) => {
     const { id } = ctx.request.query
     try {
-        const result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分\') as creatTime
-                from article where id = ?`, [id])
+        const result = await sql.query(`select article.*, user.head
+                from article inner join user ON article.userId=user.id where article.id = ?`, [id])
         ctx.body =  {
             state: 200,
             success: true,

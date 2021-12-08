@@ -9,12 +9,11 @@ const util = require('../../util/index')
  */
 router.post('/article/create', async (ctx, next) => {
     const { title, abstract, tag, category, status, content, id } = ctx.request.body
-    const { UserId, name } = ctx.state.user
+    const { id:userId, name } = ctx.state.user
     try {
         if(id) {
             let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
             let a =  await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
-            let insertId = await sql.query(`SELECT LAST_INSERT_ID()`)
             console.log(a)
             ctx.body = {
                 message: '修改成功',
@@ -23,8 +22,7 @@ router.post('/article/create', async (ctx, next) => {
             }
         } else {
             let a = await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(uuid(), ?, ?, ?, ? ,?, ?, ?, ?)',
-                [title, abstract, tag, category, status, UserId, content, name])
-            let insertId = await sql.query(`SELECT LAST_INSERT_ID()`)
+                [title, abstract, tag, category, status, userId, content, name])
             console.log(a)
         }
         ctx.body = {
@@ -55,17 +53,20 @@ router.post('/article/delete', async (ctx, next) => {
  * 返回文章列表
  */
 router.get('/article/list', async (ctx,next) => {
-    const { pageSize, pageNo, title } = ctx.request.query
+    let { pageSize, pageNo, title, status } = ctx.request.query
     const { id } = ctx.state.user
+    status = status || 2
     try {
         const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
             commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
             DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title like "%${title}%" 
-            and userId = '${id}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            and userId = '${id}' and status=${status} limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+        const count = await sql.query(`select count(*) as count from article where title like "%${title}%" and userId = '${id}'`)
         ctx.body =  {
             state: 200,
             success: true,
-            result: result
+            result: result,
+            count: count[0].count
         }
     } catch (err) {
         throw err

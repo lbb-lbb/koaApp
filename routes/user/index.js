@@ -85,10 +85,13 @@ router.post('/editMessage', async (ctx, next) => {
     const { id } = ctx.state.user
     let insert = util.filterUpdateValue({ name, tag, head, introduction })
     await sql.query(`update user set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ?`, [...insert.values, id])
+    const result = await sql.query('select * from user where id = ?', [id])
+    delete result[0].password
     ctx.body = {
         message: '修改成功',
         success: true,
-        state: 200
+        state: 200,
+        result: result[0]
     }
 })
 
