@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const util = require('../../util/index')
 const tokenTime = 1000 * 60 * 60
 const secret = process.env.secret
+const {Decrypt, Encrypt} = require("../../util/secret");
 
 router.post('/register', async (ctx, next) => {
     const { name, password } = ctx.request.body
@@ -33,7 +34,10 @@ router.post('/login', async (ctx, next) => {
     const { name, password } = ctx.request.body
     try {
         const result = await sql.query('select * from user where name = ?', [name])
-        if (password === result[0].password) {
+        console.log(Decrypt(password), 37)
+        console.log(result[0].password, 38)
+        console.log(Decrypt(result[0].password), 39)
+        if (Decrypt(password) === Decrypt(result[0].password)) {
             let { name, id } = result[0]
             const token = jwt.sign({ name, id }, secret, { expiresIn: tokenTime })
             delete result[0].password
