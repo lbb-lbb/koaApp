@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const util = require('../../util/index')
 const tokenTime = 1000 * 60 * 60
 const secret = process.env.secret
-const {Decrypt, Encrypt} = require("../../util/secret");
+const {Decrypt} = require("../../util/secret");
 
 router.post('/register', async (ctx, next) => {
     const { name, password } = ctx.request.body
@@ -104,13 +104,13 @@ router.post('/editMessage', async (ctx, next) => {
  */
 router.post('/changePassword', async (ctx, next) => {
     const { password, oldPassword } = ctx.request.body
-    console.log(ctx.request.body)
     const regexp = new RegExp('^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)])+$).{6,20}$')
-    if (regexp.test(password)) {
+    if (regexp.test(Decrypt(password))) {
         try {
             const { id } = ctx.state.user
             const result = await sql.query(`select password from user where id like ?`, [id])
-            if (result[0].password === oldPassword) {
+            console.log(Decrypt(result[0].password))
+            if (Decrypt(result[0].password) === Decrypt(oldPassword)) {
                 await sql.query('update user set password = ? where id like ?', [password, id])
                 ctx.body = {
                     state: 200,
