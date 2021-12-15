@@ -2,6 +2,7 @@ const Router = require('koa-router')
 const router = new Router
 const sql = require('../../controller/sql/index')
 const util = require('../../util/index')
+const { v4: uuidv4 } = require('uuid');
 
 
 /**
@@ -13,22 +14,22 @@ router.post('/article/create', async (ctx, next) => {
     try {
         if(id) {
             let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
-            let a =  await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
-            console.log(a)
+            await sql.query(`update article set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, ctx.state.user.id])
             ctx.body = {
                 message: '修改成功',
                 success: true,
                 state: 200
             }
         } else {
-            let a = await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(uuid(), ?, ?, ?, ? ,?, ?, ?, ?)',
-                [title, abstract, tag, category, status, userId, content, name])
-            console.log(a)
-        }
-        ctx.body = {
-            state: 200,
-            success: true,
-            message: '提交成功'
+            const uuid = uuidv4()
+            await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(?, ?, ?, ?, ? ,?, ?, ?, ?)',
+                [uuid, title, abstract, tag, category, status, userId, content, name])
+            ctx.body = {
+                state: 200,
+                success: true,
+                message: '提交成功',
+                id: uuid
+            }
         }
     } catch(err) {
         throw err
