@@ -66,8 +66,10 @@ router.post('/login', async (ctx, next) => {
 router.post('/upload', async (ctx, next) => {
     try {
         const file = ctx.request.files.file
-        let uploadPath = ctx.state.uploadPath + `\/${file.name}`
-        let path = ctx.state.path + `\/${file.name}`
+        console.log(ctx.request.files)
+        let PathName = ctx.request.files.file.path.split('\\').pop()
+        let uploadPath = ctx.state.uploadPath + `\/${PathName}`
+        let path = ctx.state.path + `\/${PathName}`
         if (uploadPath) {
             await util.uploadFile(file, uploadPath)
             ctx.body = {
