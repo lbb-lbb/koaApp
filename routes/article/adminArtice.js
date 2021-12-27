@@ -41,7 +41,6 @@ router.post('/article/create', async (ctx, next) => {
  */
 router.post('/article/delete', async (ctx, next) => {
     const { id } = ctx.request.body
-    console.log(id)
     await sql.query('delete from article where id = ?', [id])
     ctx.body = {
         message: "删除成功",
@@ -133,9 +132,7 @@ router.post('/article/comment/status', async (ctx, next) =>{
             }
         } else  {
             let result =  await sql.query(`select userId from article where id = ?`, [titleId])
-            console.log(result)
             if (userId === result[0].userId) {
-                console.log(id)
                 await sql.query(`update comment set status = ? where id =?`, [status, id])
                 ctx.body = {
                     state: 200,

@@ -46,7 +46,6 @@ router.get('/getComment', async (ctx, next) => {
         }
       })
     })
-    console.log(commentList)
     ctx.body = {
       state: 200,
       success: true,

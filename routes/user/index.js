@@ -34,9 +34,6 @@ router.post('/login', async (ctx, next) => {
     const { name, password } = ctx.request.body
     try {
         const result = await sql.query('select * from user where name = ?', [name])
-        console.log(Decrypt(password), 37)
-        console.log(result[0].password, 38)
-        console.log(Decrypt(result[0].password), 39)
         if (Decrypt(password) === Decrypt(result[0].password)) {
             let { name, id } = result[0]
             const token = jwt.sign({ name, id }, secret, { expiresIn: tokenTime })
@@ -112,7 +109,6 @@ router.post('/changePassword', async (ctx, next) => {
         try {
             const { id } = ctx.state.user
             const result = await sql.query(`select password from user where id like ?`, [id])
-            console.log(Decrypt(result[0].password))
             if (Decrypt(result[0].password) === Decrypt(oldPassword)) {
                 await sql.query('update user set password = ? where id like ?', [password, id])
                 ctx.body = {

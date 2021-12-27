@@ -52,6 +52,5 @@ router.use('/page', article)
 router.use('/common', articleShow)
 router.use('/discuss', comment)
 app.use(router.routes(), router.allowedMethods());
-console.log(process.env.prot)
 //监听3000端口
 app.listen(process.env.PROT, () => { console.log(`应用已运行于${process.env.PROT}端口`) });

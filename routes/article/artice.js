@@ -54,7 +54,6 @@ router.post('/count', async (ctx, next) => {
     const { likeCount, readCount, commentCount, id } = ctx.request.body
     try {
         let insert = util.filterUpdateValue({ likeCount, readCount, commentCount })
-        console.log(`update article set ${insert.keys.map(v => `${v}= ${v}+1`)} where id like ?`)
         await sql.query(`update article set ${insert.keys.map(v => `${v}= ${v}+1`)} where id like ?`, [id])
         ctx.body = {
             state: 200,
