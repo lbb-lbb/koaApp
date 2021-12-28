@@ -8,6 +8,7 @@
       "log_date_format": "YYYY-MM-DD HH:mm Z",
       "error_file": "./koa_err.log",
       "out_file": "./koa_out.log",
+      "ignore_watch": "*.log",
       "env": {
         "NODE_ENV": "development"
       },
