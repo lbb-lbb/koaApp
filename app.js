@@ -23,10 +23,8 @@ const err = require('./controller/err/index')
 const jwt = require('./controller/jwt/index')
 const cors = require('./controller/cors/index')
 
-const user = require('./routes/user/index')
-const article = require('./routes/article/adminArtice')
-const articleShow = require('./routes/article/artice')
-const comment = require('./routes/comment/index')
+const font = require('./routes/font/index')
+const admin = require('./routes/admin/index')
 
 
 app.use(cors)
@@ -40,17 +38,15 @@ app.use(async function (ctx, next) {
 app.use(bodyBody({
     multipart: true,
     formidable: {
-        maxFileSize: 200*1024*1024*1024,    // 设置上传文件大小最大限制，默认2M
+        maxFileSize: 200*1024*1024*10,    // 设置上传文件大小最大限制
         keepExtensions: true // 保留文件拓展名
     }
 }))
 
 app.use(jwt)
 
-router.use('/user', user)
-router.use('/page', article)
-router.use('/common', articleShow)
-router.use('/discuss', comment)
+router.use('/font', font)
+router.use('/admin', admin)
 app.use(router.routes(), router.allowedMethods());
 //监听3000端口
 app.listen(process.env.PROT, () => { console.log(`应用已运行于${process.env.PROT}端口`) });

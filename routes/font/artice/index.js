@@ -1,11 +1,11 @@
 const Router = require('koa-router')
 const router = new Router
-const sql = require('../../controller/sql/index')
-const util = require('../../util/index')
+const sql = require('../../../controller/sql/index')
+const util = require('../../../util/index')
 
 
 /**
- * 返回文章列表
+ * 返回font文章列表
  */
 router.get('/articleList', async (ctx,next) => {
     let { pageSize, pageNo, title } = ctx.request.query
