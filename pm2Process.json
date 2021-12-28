@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "koa",
+      "script": "./app.js",
+      "cwd": "./",
+      "watch": true,
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "error_file": "./koa_err.log",
+      "out_file": "./koa_out.log",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

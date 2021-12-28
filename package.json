@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "pm2 start pm2Process.json --env production",
+    "serve": "pm2 start pm2Process.json"
   },
   "author": "",
   "license": "ISC",
