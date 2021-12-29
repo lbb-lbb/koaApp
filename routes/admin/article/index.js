@@ -9,7 +9,7 @@ const { v4: uuidv4 } = require('uuid');
  */
 router.post('/article/create', async (ctx, next) => {
     const { title, abstract, tag, category, status, content, id } = ctx.request.body
-    const { id:userId, name } = ctx.state.user
+    const { id:userId} = ctx.state.user
     try {
         if(id) {
             let insert = util.filterUpdateValue({ title, abstract, tag, category, status, content })
@@ -21,8 +21,8 @@ router.post('/article/create', async (ctx, next) => {
             }
         } else {
             const uuid = uuidv4()
-            await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content, userName) values(?, ?, ?, ?, ? ,?, ?, ?, ?)',
-                [uuid, title, abstract, tag, category, status, userId, content, name])
+            await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content) values(?, ?, ?, ?, ? ,?, ?, ?, ?)',
+                [uuid, title, abstract, tag, category, status, userId, content])
             ctx.body = {
                 state: 200,
                 success: true,

@@ -35,7 +35,7 @@ router.get('/articleList', async (ctx,next) => {
 router.get('/articleInfo', async (ctx, next) => {
     const { id } = ctx.request.query
     try {
-        const result = await sql.query(`select article.*, user.head
+        const result = await sql.query(`select article.*, user.head, user.name as userName
                 from article inner join user ON article.userId=user.id where article.id = ?`, [id])
         ctx.body =  {
             state: 200,

@@ -14,10 +14,12 @@ module.exports.query = function (sql, values = []) {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (err, connection) {
             if (err) {
+                err.state = 500
                 reject(err)
             } else {
                 connection.query(sql, values, (err, results) => {
                     if (err) {
+                        err.state = 500
                         reject(err);
                     } else {
                         connection.release();
