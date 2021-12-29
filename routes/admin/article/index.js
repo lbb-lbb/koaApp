@@ -116,22 +116,5 @@ router.post('/article/status', async (ctx, next) =>{
     }
 })
 
-/**
- * 返回文章的分类给作者选
- */
-router.get('/article/classifyList', async (ctx, next) => {
-    try {
-        let result = await sql.query(`select tag, category from article`)
-        let tags = [...new Set(result.map(v => v.tag).join(',').replace(/，/ig,',').split(','))]
-        let category = [...new Set(result.map(v => v.category).join(',').split(','))]
-        ctx.body = {
-            state: 200,
-            success: true,
-            result: { tags, category }
-        }
-    } catch (err) {
-        throw err
-    }
-})
 
 module.exports = router.routes()
