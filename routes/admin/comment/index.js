@@ -1,8 +1,6 @@
 const Router = require('koa-router')
 const router = new Router
 const sql = require('../../../controller/sql/index')
-const util = require('../../../util/index')
-const { v4: uuidv4 } = require('uuid');
 
 
 

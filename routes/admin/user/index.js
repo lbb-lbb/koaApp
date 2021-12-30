@@ -8,9 +8,9 @@ const {Decrypt} = require("../../../util/secret");
 修改用户除id和password外一切信息
  */
 router.post('/editMessage', async (ctx, next) => {
-    const { name, tag, introduction, head } = ctx.request.body
+    const { name, tag, introduction, head, vx, qq, longIntroduction, github, blogIntroduction } = ctx.request.body
     const { id } = ctx.state.user
-    let insert = util.filterUpdateValue({ name, tag, head, introduction })
+    let insert = util.filterUpdateValue({ name, tag, head, introduction, vx, qq, longIntroduction, github, blogIntroduction })
     await sql.query(`update user set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ?`, [...insert.values, id])
     const result = await sql.query('select * from user where id = ?', [id])
     delete result[0].password
