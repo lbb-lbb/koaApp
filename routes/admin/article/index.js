@@ -21,7 +21,7 @@ router.post('/article/create', async (ctx, next) => {
             }
         } else {
             const uuid = uuidv4()
-            await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content) values(?, ?, ?, ?, ? ,?, ?, ?, ?)',
+            await sql.query('insert into article(id, title, abstract, tag, category, status, userId, content) values(?, ?, ?, ?, ? ,?, ?, ?)',
                 [uuid, title, abstract, tag, category, status, userId, content])
             ctx.body = {
                 state: 200,

@@ -14,12 +14,12 @@ module.exports = async (ctx, next) => {
             if (err.state) {
                 ctx.body = {
                     state: err.state,
-                    message: err
+                    message: err.message
                 }
             }
             ctx.body = {
                 state: 300,
-                message: err
+                message: err.message
             }
         }
     }
