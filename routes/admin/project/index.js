@@ -8,11 +8,11 @@ const util = require('../../../util/index')
  * 创建项目或者修改项目
  */
 router.post('/project/create', async (ctx, next) => {
-  const { link, name, dec, id } = ctx.request.body
+  const { link, name, remark, head, id } = ctx.request.body
   const { id:userId} = ctx.state.user
   try {
     if(id) {
-      let insert = util.filterUpdateValue({ link, name, dec })
+      let insert = util.filterUpdateValue({ link, name, remark, head })
       await sql.query(`update project set ${insert.keys.map(key => `${key} = ?`).join(',')} where id like ? and userId like ?`, [...insert.values, id, userId])
       ctx.body = {
         message: '修改成功',
@@ -20,13 +20,12 @@ router.post('/project/create', async (ctx, next) => {
         state: 200
       }
     } else {
-      await sql.query('insert into project( link, name, dec) values(?, ?, ?)',
-        [link, name, dec])
+      await sql.query(`insert into project(link, name, userId, remark, head) values(?,?,?,?,?)`,
+        [link, name, userId, remark, head])
       ctx.body = {
         state: 200,
         success: true,
-        message: '提交成功',
-        id: uuid
+        message: '提交成功'
       }
     }
   } catch(err) {

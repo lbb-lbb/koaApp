@@ -83,7 +83,7 @@ router.get('/article/Info', async (ctx, next) => {
         ctx.body =  {
             state: 200,
             success: true,
-            result: result
+            result: result[0]
         }
     } catch (err) {
         throw err

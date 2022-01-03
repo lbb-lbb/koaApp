@@ -18,7 +18,7 @@ router.post('/article/comment/status', async (ctx, next) =>{
                 success: false,
                 message: "请检查修改状态是否正确"
             }
-        } else  {
+        } else if (titleId)  {
             let result =  await sql.query(`select userId from article where id = ?`, [titleId])
             if (userId === result[0].userId) {
                 await sql.query(`update comment set status = ? where id =?`, [status, id])
@@ -33,6 +33,13 @@ router.post('/article/comment/status', async (ctx, next) =>{
                     success: false,
                     message: "无权限修改它人文章的评论",
                 }
+            }
+        } else {
+            await sql.query(`update comment set status = ? where id =?`, [status, id])
+            ctx.body = {
+                state: 200,
+                success: true,
+                message: "修改成功",
             }
         }
     } catch (err) {
@@ -79,8 +86,8 @@ router.get('/getCommentList', async (ctx, next) => {
             DATE_FORMAT(comment.updateTime,\'%Y年%m月%d日%H时%i分%s秒\') as updateTime,
             article.id as titleId,
             article.title
-            from comment, article where article.userId = '${id}' and comment.titleId
-            = article.id and comment.status = '${status}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            from comment left join article on article.userId = '${id}' and comment.titleId
+            = article.id where comment.status = '${status}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         for (let v in result) {
             if (result[v].pid) {
                 let replyData = await sql.query(`select * from comment where id = '${result[v].pid}'`)
