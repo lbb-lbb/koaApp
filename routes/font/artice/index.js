@@ -8,15 +8,18 @@ const util = require('../../../util/index')
  * 返回font文章列表
  */
 router.get('/articleList', async (ctx,next) => {
-    let { pageSize, pageNo, title } = ctx.request.query
+    let { pageSize, pageNo, title, tag, category } = ctx.request.query
     pageSize = pageSize || 100000
     pageNo = pageNo || 1
     title = title || ''
+    tag = tag && tag.replace(/,/g,"|") || ''
+    category = category || ''
     try {
         const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
             commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
             DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title 
-            like "%${title}%" and status=2 limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            like "%${title}%" and tag regexp "${tag || '.'}" and category like "%${category}%" 
+            and status=2 limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         const count = await sql.query(`select count(*) as count from article where title like "%${title}%"`)
         ctx.body =  {
             state: 200,
@@ -35,7 +38,8 @@ router.get('/articleList', async (ctx,next) => {
 router.get('/articleInfo', async (ctx, next) => {
     const { id } = ctx.request.query
     try {
-        const result = await sql.query(`select article.*, user.head, user.name as userName
+        const result = await sql.query(`select article.*, DATE_FORMAT(article.creatTime,\'%Y年%m月%d日%H时') as creatTime,
+                user.head, user.name as userName, user.introduction
                 from article inner join user ON article.userId=user.id where article.id = ?`, [id])
         ctx.body =  {
             state: 200,
