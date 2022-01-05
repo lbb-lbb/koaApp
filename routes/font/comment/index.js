@@ -7,7 +7,7 @@ const util = require('../../../util/index')
  * 创建评论
  */
 router.post('/create', async(ctx, next) => {
-    const { comment, titleId, pid, name, email, replyId } = ctx.request.body
+    const { comment, titleId, pid, name, email, replyId, head } = ctx.request.body
     if (!comment || !titleId || !name) {
         ctx.body = {
             state: 300,
@@ -16,8 +16,8 @@ router.post('/create', async(ctx, next) => {
         }
     }
     try {
-        await sql.query('insert into comment(comment, titleId, pid, name, email, replyId, status, id) values(?,?,?,?,?,?,0,uuid())',
-            [comment, titleId, pid, name, email, replyId])
+        await sql.query('insert into comment(comment, titleId, pid, name, email, replyId, head, status, id) values(?,?,?,?,?,?,?,0,uuid())',
+            [comment, titleId, pid, name, email, replyId, head])
         ctx.body = {
             state: 200,
             success: true,
@@ -33,9 +33,11 @@ router.post('/create', async(ctx, next) => {
 router.get('/getComment', async (ctx, next) => {
     const { id, pageNo, pageSize } = ctx.request.query
     try {
-        let result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
-        DATE_FORMAT(updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime
-        from comment where status = 1 and titleId = ? order by creatTime desc`, [id])
+        let result = await sql.query(`select comment.*, DATE_FORMAT(comment.creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
+        DATE_FORMAT(comment.updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime,
+        user.head as userHead,
+        user.name as userName
+        from comment left join user on comment.userId = user.id where status = 1 and titleId = ? order by creatTime desc`, [id])
         let countComment = result.filter(v => !v.pid)
         let commentList = countComment.slice((pageNo - 1) * pageSize, pageSize * pageNo)
         commentList.forEach(v => {
