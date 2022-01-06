@@ -82,14 +82,14 @@ router.get('/getCommentList', async (ctx, next) => {
     try {
         let result = await sql.query(`select 
             comment.*,
-            DATE_FORMAT(comment.creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
-            DATE_FORMAT(comment.updateTime,\'%Y年%m月%d日%H时%i分%s秒\') as updateTime,
+            UNIX_TIMESTAMP(comment.creatTime) as creatTime,
+            UNIX_TIMESTAMP(comment.updateTime) as updateTime,
             article.title
             from comment left join article on article.userId = '${id}' and comment.titleId
             = article.id where comment.status = '${status}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         for (let v in result) {
             if (result[v].pid) {
-                let replyData = await sql.query(`select * from comment where id = '${result[v].pid}'`)
+                let replyData = await sql.query(`select *, UNIX_TIMESTAMP(creatTime) as creatTime from comment where id = '${result[v].pid}'`)
                 result[v].replyGroup = replyData[0]
             }
         }

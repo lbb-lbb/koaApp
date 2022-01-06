@@ -33,7 +33,7 @@ router.post('/create', async(ctx, next) => {
 router.get('/getComment', async (ctx, next) => {
     const { id, pageNo, pageSize } = ctx.request.query
     try {
-        let result = await sql.query(`select comment.*, DATE_FORMAT(comment.creatTime,\'%Y年%m月%d日%H时%i分%s秒\') as creatTime,
+        let result = await sql.query(`select comment.*, UNIX_TIMESTAMP(comment.creatTime) as creatTime,
         DATE_FORMAT(comment.updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime,
         user.head as userHead,
         user.name as userName
