@@ -59,7 +59,7 @@ router.get('/article/list', async (ctx,next) => {
         const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
             commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
             DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title like "%${title}%" 
-            and userId = '${id}' and status=${status} limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            and userId = '${id}' limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         const count = await sql.query(`select count(*) as count from article where title like "%${title}%" and userId = '${id}'`)
         ctx.body =  {
             state: 200,

@@ -37,7 +37,7 @@ router.get('/getComment', async (ctx, next) => {
         DATE_FORMAT(comment.updateTime,\'%Y-%m-%d %H:%i:%s\') as updateTime,
         user.head as userHead,
         user.name as userName
-        from comment left join user on comment.userId = user.id where status = 1 and titleId = ? order by creatTime desc`, [id])
+        from comment left join user on comment.userId = user.id where (status = 1 or status = 2) and titleId = ? order by creatTime desc`, [id])
         let countComment = result.filter(v => !v.pid)
         let commentList = countComment.slice((pageNo - 1) * pageSize, pageSize * pageNo)
         commentList.forEach(v => {
