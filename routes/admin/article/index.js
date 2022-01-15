@@ -52,14 +52,17 @@ router.post('/article/delete', async (ctx, next) => {
  * 返回文章列表
  */
 router.get('/article/list', async (ctx,next) => {
-    let { pageSize, pageNo, title, status } = ctx.request.query
+    let { pageSize, pageNo, title, status, tag, category } = ctx.request.query
     const { id } = ctx.state.user
     status = status || 2
+    tag = tag || ''
+    category = category || ''
     try {
-        const result = await sql.query(`select title, id, abstract, tag, category, likeCount, readCount,
-            commentCount, userName, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
-            DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from article where title like "%${title}%" 
-            and userId = '${id}' and status=${status} limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+        const result = await sql.query(`select article.*, DATE_FORMAT(article.creatTime,\'%Y年%m月%d日%H时') as creatTime, 
+            user.name as userName,
+            DATE_FORMAT(article.updateTime,\'%Y年%m月%d日%H时\') as updateTime from article left join user
+             on article.userId = user.id where article.title like "%${title}%" and userId = '${id}'
+             and article.tag regexp "${tag || '.'}" and article.category like "%${category}%" limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         const count = await sql.query(`select count(*) as count from article where title like "%${title}%" and userId = '${id}'`)
         ctx.body =  {
             state: 200,
