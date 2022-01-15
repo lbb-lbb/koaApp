@@ -29,9 +29,7 @@ const admin = require('./routes/admin/index')
 
 app.use(cors)
 app.use(err)
-app.use(static((__dirname + '/static'), {
-    maxAge: 31536000
-}))
+app.use(static(__dirname + '/static'))
 app.use(async function (ctx, next) {
     ctx.state.path = process.env.BASE_URL
     ctx.state.uploadPath = __dirname + '/static/images'
