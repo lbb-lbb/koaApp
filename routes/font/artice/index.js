@@ -19,7 +19,7 @@ router.get('/articleList', async (ctx,next) => {
             user.name as userName,
             DATE_FORMAT(article.updateTime,\'%Y年%m月%d日%H时\') as updateTime from article left join user
              on article.userId = user.id where article.title like "%${title}%" and article.tag regexp "${tag || '.'}" and article.category like "%${category}%" 
-            and article.status=2 limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            and article.status=2 order by creatTime desc limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
         const count = await sql.query(`select count(article.id) as count from article left join user
              on article.userId = user.id where article.title like "%${title}%" and article.tag regexp "${tag || '.'}" and article.category like "%${category}%" 
             and article.status=2`)

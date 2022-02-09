@@ -11,7 +11,7 @@ router.get('/friendLink/list', async (ctx,next) => {
   try {
     const result = await sql.query(`select *, DATE_FORMAT(creatTime,\'%Y年%m月%d日%H时') as creatTime, 
             DATE_FORMAT(updateTime,\'%Y年%m月%d日%H时\') as updateTime from friendLink where name like "%${name}%" 
-            limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
+            order by creatTime desc limit ${(pageNo - 1) * pageSize}, ${pageSize * pageNo}`)
     const count = await sql.query(`select count(*) as count from friendLink where name like "%${name}%"`)
     ctx.body =  {
       state: 200,
